@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "C:/Users/hp/OneDrive/Desktop/Studies/Social eagle/RPA/rpa/Scripts/python.exe",
+    "python.analysis.extraPaths": [
+        "C:/Users/hp/OneDrive/Desktop/Studies/Social eagle/RPA/rpa/Lib/site-packages"
+    ]
+}
