@@ -1,0 +1,35 @@
+langchain==0.3.13
+langchain-openai==0.2.14
+langchain-community==0.3.13
+langchain-core==0.3.29
+langchain-text-splitters==0.3.5
+
+# OpenAI
+openai==1.58.1
+
+# Vector Store
+faiss-cpu==1.9.0.post1
+tiktoken==0.8.0
+
+# Document Processing
+PyPDF2==3.0.1
+python-docx==0.8.11
+openpyxl==3.1.4
+pandas==2.2.3
+
+# Web Framework
+streamlit==1.39.0
+streamlit-option-menu==0.4.0
+
+# Utilities
+python-dotenv==1.0.1
+numpy==1.26.4
+pydantic==2.10.5
+pydantic-settings==2.7.1
+
+# Logging & Progress
+tqdm==4.67.1
+rich==13.9.4
+
+# Additional
+requests==2.32.3

@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  rag-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-assistant
+    ports:
+      - "8501:8501"
+    volumes:
+      # Code volume for live development
+      - .:/app
+      # Data volumes for persistence
+      - rag_indexes:/app/indexes
+      - rag_sessions:/app/sessions
+      - rag_logs:/app/logs
+      - rag_exports:/app/exports
+      - rag_data:/app/data
+    environment:
+      # Load from docker.env
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      CHUNK_SIZE: ${CHUNK_SIZE:-1000}
+      CHUNK_OVERLAP: ${CHUNK_OVERLAP:-200}
+      QUALITY_THRESHOLD: ${QUALITY_THRESHOLD:-0.6}
+      CHECK_HALLUCINATION: ${CHECK_HALLUCINATION:-true}
+      ENABLE_FALLBACK: ${ENABLE_FALLBACK:-true}
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+    # Restart policy
+    restart: unless-stopped
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  rag_indexes:
+    driver: local
+  rag_sessions:
+    driver: local
+  rag_logs:
+    driver: local
+  rag_exports:
+    driver: local
+  rag_data:
+    driver: local
+
+networks:
+  default:
+    name: rag-network
+    driver: bridge

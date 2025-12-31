@@ -1,0 +1,43 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+.env
+.env.local
+*.log
+.DS_Store
+node_modules
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.tmp
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+
+# Cache
+.cache
+.streamlit/cache
+
+# Session files (will be mounted)
+sessions_backup/
+
+# Development
+venv/
+env/
+*.egg-info
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
