@@ -1,0 +1,557 @@
+{
+  "name": "Slack to gmail newsletter",
+  "nodes": [
+    {
+      "parameters": {
+        "trigger": "={{ [\"app_mention\"] }} ",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7WTH2DHT",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        -496
+      ],
+      "id": "263f8d7d-4d4f-476d-9ce9-35159120aa4d",
+      "name": "Slack Trigger",
+      "webhookId": "8aa3a2da-439f-4466-8e10-230eaac3d0dc",
+      "credentials": {
+        "slackApi": {
+          "id": "WCRYUXucZ1fpa1nG",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7WTH2DHT",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ $json.slack_payload }}",
+        "text": "={{ $json.slack_fallback }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        400,
+        -256
+      ],
+      "id": "92f70d49-d94a-42a3-aa8f-b05f7419da8c",
+      "name": "Send a message",
+      "webhookId": "391f39f0-e290-460e-8796-5bab744d106e",
+      "credentials": {
+        "slackApi": {
+          "id": "pAP4Q9clVMmPMf4a",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ Object.values($json)[0] || \"No text provided\" }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "AI topic",
+              "description": "Purpose: To identify requests where the user is seeking information, news, tutorials, or data specifically related to Artificial Intelligence, Machine Learning, or Neural Networks.\n\nDescription: Use this category if the user is asking about AI technologies, models, or industry trends.\n\nVerification Steps (Chain of Thought):\n\nIdentify Keywords: Does the input contain terms like GPT, LLM, Neural Networks, Deep Learning, OpenAI, Anthropic, Gemini, RAG, or \"Artificial Intelligence\"?\n\nCheck Intent: Is the user asking for a definition, a \"how-to,\" or the latest news regarding an AI tool?\n\nVerify Context: Even if the tone is casual (e.g., \"Tell me something cool about AI\"), if the subject is AI, it belongs here.\n\nDecision: If Steps 1 and 2 are \"Yes,\" classify as: AI Topic Search.\n\nPhrases for \"AI Topic Search\":\n\n- \"Can you find me the latest news on GPT-5's release date?\" (Direct)\n\n\"How do I implement RAG with a vector database?\" (Technical)\n\n\"What are the ethical concerns surrounding deepfakes in 2026?\" (Industry Trend)\n\n\"Explain the difference between a transformer and a recurrent neural network.\" (Educational)\n\n\"I need a tutorial on fine-tuning Llama 3 on a local machine.\" (How-to)\n\n\"Who are the main competitors to OpenAI right now?\" (Industry Analysis)\n\n\"Show me some high-quality datasets for training a sentiment analysis model.\" (Resource Request)\n\n\"Is it true that Anthropic's new model surpassed Gemini in coding benchmarks?\" (Comparison)\n\n\"How does backpropagation work in deep learning?\" (Fundamental Theory)\n\n\"Tell me about the use of AI in medical imaging for cancer detection.\" (Applied AI)"
+            },
+            {
+              "category": "Non AI topic",
+              "description": "Purpose: To capture all other queries including general knowledge, casual greetings, personal chat, or technical topics unrelated to Artificial Intelligence (e.g., general hardware, cooking, travel, or standard software troubleshooting).\n\nDescription & Chain of Verification\n\nDescription: Use this category for any input that does not have Artificial Intelligence as its primary subject matter.\n\nVerification Steps (Chain of Thought):\n\nCheck for AI Absence: Does the input lack specific mention of AI models or machine learning concepts?\n\nIdentify General Intent: Is the user just saying \"Hello,\" asking about the weather, or discussing a topic like \"How to fix a leaky faucet\"?\n\nDistinguish Technical vs. AI: If the user asks about \"Python programming\" or \"Database setup\" WITHOUT mentioning AI/ML libraries, it belongs here.\n\nDecision: If the input is social or covers non-AI domains, classify as: Non AI Topics.\n\nPhrases for \"Non AI Topics\":\n\n\"Hello! I'm just checking in to see how this workflow is running.\" (Casual/Greeting)\n\n\"What is the best way to bake a sourdough bread at home?\" (General Knowledge)\n\n\"Can you help me fix a syntax error in my Python script's for-loop?\" (Technical but NOT AI)\n\n\"I'm looking for flight prices from New York to London for next summer.\" (Utility Search)\n\n\"Who won the World Series last year?\" (Sports/General)\n\n\"Thanks for the help earlier, I've got everything I need.\" (Closer/Social)\n\n\"How do I set up a PostgreSQL database on an AWS EC2 instance?\" (Cloud/Infra - often misclassified as AI)\n\n\"What are the benefits of daily meditation for stress relief?\" (Lifestyle)\n\n\"Can you summarize the plot of the movie Inception?\" (Entertainment)\n\n\"Tell me a joke about a robot that doesn't involve machine learning.\" (Casual/Humor)\n\n"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "### ROLE\nYou are a high-precision text classification engine. Your sole task is to map user input into one of two specific categories.\n\n### CATEGORIES\n1. AI topic\n2. Non AI topic\n\n### VERIFICATION LOGIC\n- Step 1: Identify if AI-specific terms like GPT, LLM, or Neural Networks, Prompts and All AI related topics are present.\n- Step 2: If the text is general a greeting, it belongs in Non AI topic.\n- Step 3: Select the most accurate label.\n\n### OUTPUT CONSTRAINT\nReturn Output only the category name. Do not include any JSON formatting or brackets.\n\nDo NOT use Markdown. \nDo NOT use brackets or quotes.\nValid results: AI topic OR Non AI topic",
+          "enableAutoFixing": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        -512
+      ],
+      "id": "69b285b0-677f-4f41-96f5-15612eeb130b",
+      "name": "Text Classifier",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -576,
+        -320
+      ],
+      "id": "05866235-3af4-4805-b136-0f62cb137eeb",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mTBTKk3206wipZGn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Role: You are a Senior Editorial Director and Full-Stack Developer specializing in high-end digital publications.\n\nTask: Research and write an insightful, long-form AI newsletter on the topic: {{ Object.values($json)[0] }}.\n\nContext:\n\nFreshness: Use only factual data from the last 7 days (Post-Jan 4, 2026).\n\nDepth: Provide Editorial Context. For each major story, write 2-3 detailed paragraphs explaining the technical \"Why\" and the \"So What\" for the industry. Avoid vague summaries.\n\nLinks: Every single story and tool mentioned must include its verified source URL.\n\nFormat: Return ONLY a raw JSON object with exactly two keys:\n\ngmail_html: A standalone HTML string following the Elegant Light Magazine style (Background: #FDF9F3, Container: #FFFFFF, Fonts: Georgia headers and Helvetica body, Accents: #B38E5D). Use a 3-column layout where applicable.\n\nslack_blocks: A JSON array of Slack Block Kit objects. Use header, divider, and section blocks. For links, use the Slack format: <URL|Link Text>. Use emojis as visual anchors (📰, 🔬, 💡).\n\nRestrictions: > * Return ONLY the raw JSON object.\n\nDo NOT include markdown code blocks (```json).\n\nDo NOT include any conversational preamble."
+            },
+            {
+              "role": "system",
+              "content": "=**Role:** Senior Editorial Director and UI/UX Developer.\n\n**Task:** Research and write an insightful AI newsletter on: **{{ Object.values($json)[0] }}**.\n\n**Context:**\n* **Depth:** Write 2-3 detailed paragraphs per feature story. Explain the \"Why it matters.\"\n* **Links:** You MUST include clickable source links for every article mentioned.\n* **Verification:** Use data from the last 7 days only.\n\n**Output Format:**\nReturn ONLY a JSON object with `gmail_html` and `slack_blocks`.\n\n**Editorial Guidelines:**\n* **Gmail HTML:** Use a 3-column Magazine Grid. Use <a> tags for links. Style with Georgia (serif) and Helvetica (sans-serif) on a #FDF9F3 background.\n* **Slack Blocks:** Use a list of blocks (header, divider, section). \n    * **Important:** For links in Slack, use the format: <URL|Link Text>.\n    * Use emojis: 📰 (News), 🔬 (Research), 💡 (Tips).\n\n**Restrictions:** Return raw JSON only. No markdown code blocks."
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        -512
+      ],
+      "id": "2d385b04-5d77-41f1-96bd-1e7140cd9adf",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mTBTKk3206wipZGn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ramsabarish007@gmail.com",
+        "subject": "AI Newsletter",
+        "message": "={{ $json.gmail_body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        -512
+      ],
+      "id": "aba6ede4-6a77-4701-86c5-0f5781277eba",
+      "name": "Send a message1",
+      "webhookId": "4d07d1c8-2a4d-4591-a2a2-83e90c87e24f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YVBRoik1qkfU6qL8",
+          "name": "Ram007 email"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://deepmind.com/blog/feed/basic/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        288
+      ],
+      "id": "0d7f5ea9-71cd-4ae9-a469-9cd131435e14",
+      "name": "Deep mind"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        128
+      ],
+      "id": "70c82b35-01ef-4319-a12c-2b7071f7a4b1",
+      "name": "Techcrunch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9710206e-6edb-416c-bdb1-c05ce42b6d02",
+              "name": "={{ $json.text }}",
+              "value": "={{ $json.blocks[0].elements[0].elements[1].text.replace(/^<@\\w+>\\s*/, \"\").trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -816,
+        -496
+      ],
+      "id": "4b9d91f2-03ad-41d8-9578-56df68515f99",
+      "name": "Lowercase"
+    },
+    {
+      "parameters": {
+        "operation": "duckduckgo",
+        "q": "={{ Object.values($json)[0]}}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        112
+      ],
+      "id": "94acb6b6-5340-449e-a818-73396a595534",
+      "name": "Duckduckgo search",
+      "credentials": {
+        "serpApi": {
+          "id": "hM6EE31dUsQHuipu",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "google_scholar",
+        "q": "={{ Object.values($('Lowercase').item.json)[0]}}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        128
+      ],
+      "id": "dc013243-eb41-4177-bb3b-b9d31a1ac5ae",
+      "name": "Google_scholar search",
+      "credentials": {
+        "serpApi": {
+          "id": "hM6EE31dUsQHuipu",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        0,
+        224
+      ],
+      "id": "6d606512-887d-4c56-acec-8de1746dae66",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "include": "specifiedFields",
+        "fieldsToInclude": "={{ $json.organic_results.title }}{{ $json.news_results.toJsonString()}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        432,
+        224
+      ],
+      "id": "99f76911-3626-412f-8d93-14bfa7f6e40e",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "operation": "google_news",
+        "q": "=",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        144
+      ],
+      "id": "04db69b6-661f-4b95-b42d-4c416f7883c6",
+      "name": "Google_news search",
+      "credentials": {
+        "serpApi": {
+          "id": "hM6EE31dUsQHuipu",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "q": "={{ Object.values($json)[0]}}",
+        "locationSettings": {},
+        "languageSettings": {},
+        "searchOptions": {
+          "filter": "1"
+        },
+        "timeFilters": {
+          "time_period": "last_month"
+        },
+        "pagination": {},
+        "advancedOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@searchapi/n8n-nodes-searchapi.searchApiTool",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -272
+      ],
+      "id": "8431a3f9-ab31-4001-bbfa-aeccf610e602",
+      "name": "Search google in SearchApi",
+      "credentials": {
+        "searchApi": {
+          "id": "YlVl9GI1V7DsVDqM",
+          "name": "SearchApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the deep-nested text from the AI output\nconst rawResponse = $input.first().json.output[0].content[0].text;\n\n// 2. Parse the string into a JSON object\nlet data;\ntry {\n    // Strips any accidental backticks and parses the JSON\n    const cleanJson = rawResponse.replace(/^```json\\s*|```\\s*$/g, \"\").trim();\n    data = JSON.parse(cleanJson);\n} catch (e) {\n    throw new Error(\"AI failed to return valid JSON: \" + e.message);\n}\n\n// 3. Return separate fields for the next nodes\nreturn {\n    gmail_body: data.gmail_html,\n    slack_payload: {\n        blocks: data.slack_blocks\n    },\n    slack_fallback: `🚀 Weekly Intelligence: ${Object.values($json)[0]}`\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -512
+      ],
+      "id": "e41c2ae8-ab6c-4221-8e8e-8648312cc24c",
+      "name": "Gmail formatter"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7WTH2DHT",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "text": "I am an intelligent AI bot, Provide me any AI related topics I will search the internet and prepare the newsletter for you!!!",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        416,
+        -32
+      ],
+      "id": "3479dc58-d012-454e-80bd-fd1c7f414a7a",
+      "name": "Send a message2",
+      "webhookId": "391f39f0-e290-460e-8796-5bab744d106e",
+      "credentials": {
+        "slackApi": {
+          "id": "pAP4Q9clVMmPMf4a",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Slack Trigger": {
+      "main": [
+        [
+          {
+            "node": "Lowercase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Gmail formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Techcrunch": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deep mind": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Lowercase": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duckduckgo search": {
+      "main": [
+        []
+      ]
+    },
+    "Google_scholar search": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        []
+      ]
+    },
+    "Google_news search": {
+      "main": [
+        []
+      ]
+    },
+    "Search google in SearchApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail formatter": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "e05fcd99-6ed8-44b2-963a-e792d5d5b24b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "777e652bc55ae700311d3ecc4a55b406e680a4e1c0d2933f4b81092e96d310bf"
+  },
+  "id": "Lyg0pPrV_br4y8QuCWCSi",
+  "tags": []
+}
