@@ -9,5 +9,4 @@ docker.env
 
 # Secrets
 .env.*
-*.mp4
 __pycache__/
