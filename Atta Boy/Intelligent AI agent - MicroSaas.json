@@ -1,0 +1,510 @@
+{
+  "name": "Intelligent AI agent - MicroSaas",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an intelligent AI agent names as \"Atta Boy\"\n\nAnswer the user query :  {{ $json.body.message }}\n\nCurrent system date and time: {{ $json.current_date }}\n\nThe user will check the memory capability, hence try to remeber the context of the chat\n\nIf the user explicitly mentioned as @rag then  you have to look for the data from the RAG vector\n\nYour are connected with two tools\nRAG vector and Serp API for websearch\n\nYour task is to answer the user query intelligently decide whether to use tool call based on the user query",
+        "options": {
+          "systemMessage": "You are an intelligent autonomous AI Agent - named as Atta Boy - An AI Intelligent agent!!! You are connected to an MCP (Model Context Protocol) server that provides two tools:\n\n📘 Pinecone_Vector_DB (RAG Tool) — used to retrieve context or summaries from stored or uploaded documents.\n\n🌐 SerpAPI_Web_Search (Web Search Tool) — used to find live, up-to-date, or real-world information from the internet.\n\n⚙️ Decision Logic\n\nIf the user’s question relates to stored knowledge, uploaded PDFs, or summaries of existing documents, automatically use the Pinecone_Vector_DB tool.\n\nIf the user asks about current events, trending data, or external topics, use the SerpAPI_Web_Search tool.\n\nIf neither applies, use your own general reasoning to respond naturally and accurately.\n\n🧾 Response Handling\n\nMCP tool responses may include encoded or raw JSON — always parse internally and extract only relevant human-readable information such as:\n\nTitles, snippets, or summaries\n\nMain facts or actionable points\n\nKey links (if relevant and short)\n\nNever expose JSON, metadata, or tool logs in your output.\nYour goal is to convert structured tool data into clear, conversational answers.\n\n💬 Formatting Rules\n\nPrefix your answer based on the data source:\n\n📘 Answer (from RAG Context): if from Pinecone\n\n🌐 Answer (from Web Search): if from SerpAPI\n\n💡 Answer (from general knowledge, not from RAG): if answered using your own reasoning\n\nKeep answers concise, factual, and easy to understand.\nWhen combining tool data with reasoning, merge sources naturally and mention both.\n\n✅ Examples\n\nUser: “Summarize the uploaded project report.”\n→ 📘 Answer (from RAG Context): The project report focuses on automating task flows using AI and shows a 25% efficiency improvement.\n\nUser: “Find trending high-protein recipes.”\n→ 🌐 Answer (from Web Search): Top recipes include BBC Good Food’s high-protein meal list and Delish’s 45 easy recipes for fitness diets.\n\nUser: “Who created n8n?”\n→ 💡 Answer (from general knowledge, not from RAG): n8n was founded by Jan Oberhauser in 2019.\n\n⚖️ Final Guidance\n\nAlways act autonomously — choose the right tool automatically, summarize clearly, and ensure every answer is concise, friendly, and source-aware.",
+          "returnIntermediateSteps": true,
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "cef3a141-8038-4518-aeab-9fafd1be808a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        224
+      ],
+      "id": "2caaeb7b-298a-4f5c-9166-c88f2bb1c4bd",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://n8n.srv1256698.hstgr.cloud/mcp/451ec265-b051-4a68-9331-3bdc688d829c",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        224
+      ],
+      "id": "8b49cfcc-28bf-4f92-b89c-2bdfd8f754a6",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "024b93ef-da75-4c4e-8a77-fa72ad5b7741",
+      "name": "Chat webhook",
+      "webhookId": "f37c8b40-5bcd-473b-95ec-2ee3d1907c06"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {
+          "enableStreaming": true
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        768,
+        0
+      ],
+      "id": "bbde684d-7029-466b-a95c-2310f8458026",
+      "name": "Chat response status"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        224
+      ],
+      "id": "e5cfdf05-a091-42b9-b09e-0256eca73f13",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mTBTKk3206wipZGn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "=rag-mcp",
+          "mode": "id"
+        },
+        "options": {
+          "clearNamespace": true,
+          "pineconeNamespace": "micro-saas_rag_ai_agent"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -736,
+        0
+      ],
+      "id": "459fa7ea-a97b-403c-949f-4ccabe12479c",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "Z7Ny2FE87Qyz2hHW",
+          "name": "Socialeagle_ai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -688,
+        272
+      ],
+      "id": "d3e1d618-cd47-4cde-844f-1f28b272fb25",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -848,
+        288
+      ],
+      "id": "c9a0abfa-a779-4873-9380-be8401e41351",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mTBTKk3206wipZGn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        480
+      ],
+      "id": "043f79cc-c4c6-4cf1-869e-e6f3891d6ce6",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-file",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://id-preview--0f28e010-fdba-4ddd-a6f1-9a888971f565.lovable.app/",
+          "binaryPropertyName": "file"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -944,
+        0
+      ],
+      "id": "0d18ea11-8e27-4741-8df9-a3f63803c2b6",
+      "name": "Upload doc",
+      "webhookId": "ae4dc2e3-0915-4a7f-92c9-2ed2dce1b0af"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"✅ File uploaded and indexed successfully in Pinecone!\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -384,
+        0
+      ],
+      "id": "237a8da3-cd97-465f-a6cb-102082440158",
+      "name": "Upload doc response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "109dc369-4d49-4f7f-bcb7-7a55c0123e4a",
+              "name": "=current_date",
+              "value": "={{ new Date().toLocaleString(\"en-IN\", { dateStyle: \"full\", timeStyle: \"medium\", timeZone: \"Asia/Kolkata\" }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ffff3757-2569-4873-a6c1-207aec152b1b",
+      "name": "Current date context"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1mpJW2P0_IH0RxdfVtggRB1DNwpwSv6BuHQYMggxpMgw",
+          "mode": "list",
+          "cachedResultName": "Atta boy - Rag Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mpJW2P0_IH0RxdfVtggRB1DNwpwSv6BuHQYMggxpMgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mpJW2P0_IH0RxdfVtggRB1DNwpwSv6BuHQYMggxpMgw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Session ID": "={{ $('Current date context').item.json.body.sessionId }}",
+            "Message": "={{ $('Current date context').item.json.body.message }}",
+            "Date and time": "={{ $('Current date context').item.json.current_date }}",
+            "Response": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date and time",
+              "displayName": "Date and time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Response",
+              "displayName": "Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        784,
+        240
+      ],
+      "id": "3b40b822-a64d-44eb-8f27-45f8e398aa75",
+      "name": "Log records",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HexqWL4T5EgM0VXS",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Current date context": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.srv1256698.hstgr.cloud",
+            "user-agent": "node-fetch",
+            "content-length": "85",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br",
+            "content-type": "application/json",
+            "x-forwarded-for": "35.237.133.145",
+            "x-forwarded-host": "n8n.srv1256698.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "792b45eb7f08",
+            "x-real-ip": "35.237.133.145"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "sessionId": "bec2fd91-f685-4660-94e0-c1cc3f1f97f3",
+            "message": "who is john Kennedy?"
+          },
+          "webhookUrl": "https://n8n.srv1256698.hstgr.cloud/webhook/chat",
+          "executionMode": "production",
+          "current_date": "Monday, 19 January 2026 at 5:27:57 pm"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Chat response status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat webhook": {
+      "main": [
+        [
+          {
+            "node": "Current date context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "main": [
+        [
+          {
+            "node": "Upload doc response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload doc": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current date context": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "3ca0e876-33cd-43f9-9fa6-e707f04bca5f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "777e652bc55ae700311d3ecc4a55b406e680a4e1c0d2933f4b81092e96d310bf"
+  },
+  "id": "1qZQ_HkYvCHALNnTfmW2G",
+  "tags": []
+}
